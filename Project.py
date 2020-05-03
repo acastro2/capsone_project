@@ -30,6 +30,9 @@ from random import gauss
 from random import seed
 from matplotlib import pyplot
 from arch import arch_model
+from statsmodels.graphics.tsaplots import plot_acf
+from statsmodels.graphics.tsaplots import plot_pacf
+from statsmodels.stats import diagnostic
 
 
 def get_prices(ticker, start, end):
@@ -125,28 +128,124 @@ def forecast_volatility(prices):
 
     return price_dataframe.iloc[-1]['forecast_vol'].T
 
-def run(ticker, init, end):
-    print("=" * 25)
-    print(ticker)
-    print("=" * 25)
-    prices = get_prices(ticker, init, end)
-    last_price = prices.iloc[-1].T
 
-    volatility = forecast_volatility(prices)
+def get_daily_returns(prices):
+    """
+    Calculate and return Daily Returns based on provided prices
 
-    calculate_var(100000, last_price, 0.95, volatility)
+    Parameters
+    ==========
+    prices : array
+        Prices of stock
+    """
+
+    data_ret = np.log(prices).diff().dropna()
+
+    return data_ret
+
 
 def main():
     """
     Program's main entrypoint
     """
-    days_to_subtract = 180
-    end = datetime(2020, 3, 31)
-    init = end - timedelta(days=days_to_subtract)
+    # Define start data and end date
+    start = "2019-01-01"
+    end = "31-03-31"
 
-    run("^GSPC", init, end)
-    run("^GDAXI", init, end)
-    run("SSE.L", init, end)
+    # Tickers
+    sp500_ticker = "^GSPC"
+    dax30_ticker = "^GDAXI"
+    sse_ticker = "SSE.L"
+
+    # S&P500
+    sp500 = get_prices(sp500_ticker, start, end)
+    # DAX30
+    dax30 = get_prices(dax30_ticker, start, end)
+    # SSE
+    sse = get_prices(sse_ticker, start, end)
+
+    # Ploting the data
+    fig, axs = pyplot.subplots(
+        1, 3, sharex=True, figsize=(14, 5), constrained_layout=True)
+    fig.suptitle('Prices', fontsize=16)
+
+    # Setting the different subplots
+    axs[0].plot(sp500, color='red')
+    axs[0].set_title('S&P 500')
+    axs[1].plot(dax30, color='green')
+    axs[1].set_title('DAX 30')
+    axs[2].plot(sse, color='blue')
+    axs[2].set_title('SSE')
+
+    # S&P500 daily returns
+    sp500_ret = get_daily_returns(sp500)
+    # DAX30 daily returns
+    dax30_ret = get_daily_returns(dax30)
+    # SSE daily returns
+    sse_ret = get_daily_returns(sse)
+
+    # Ploting the histogram of daily returns
+    n_bins = 10
+
+    fig, axs = pyplot.subplots(
+        1, 3, sharey=True, figsize=(15, 5), constrained_layout=True)
+    fig.suptitle('Returns', fontsize=16)
+
+    # Setting the different subplots
+    axs[0].hist(sp500_ret, bins=n_bins, color='red')
+    axs[0].set_title('S&P 500')
+    axs[1].hist(dax30_ret, bins=n_bins, color='green')
+    axs[1].set_title('DAX 30')
+    axs[2].hist(sse_ret, bins=n_bins, color='blue')
+    axs[2].set_title('SSE')
+
+    # Ploting ACF and PACF of returns
+    fig, axs = pyplot.subplots(
+        2, 3, sharey=False, figsize=(15, 8), constrained_layout=True)
+    fig.suptitle('Autocorrelation', fontsize=16)
+
+    # ACF and PACF of S&P500 daily returns
+    fig = plot_acf(sp500_ret, ax=axs[0, 0], color='red')
+    fig = plot_pacf(sp500_ret, ax=axs[1, 0], color='red')
+    axs[0, 0].set_title('S&P 500')
+
+    # ACF and PACF of DAX30 daily returns
+    fig = plot_acf(dax30_ret, ax=axs[0, 1], color='green')
+    fig = plot_pacf(dax30_ret, ax=axs[1, 1], color='green')
+    axs[0, 1].set_title('DAX 30')
+
+    # ACF and PACF of SSE daily returns
+    fig = plot_acf(sse_ret, ax=axs[0, 2], color='blue')
+    fig = plot_pacf(sse_ret, ax=axs[1, 2], color='blue')
+    axs[0, 2].set_title('SSE')
+
+    # ARCH effect test on series of returns
+    sp500ret_archtest = diagnostic.het_arch(sp500_ret)
+    print('SP500 arch test: ', sp500ret_archtest)
+    dax30ret_archtest = diagnostic.het_arch(dax30_ret)
+    print('DAX30 arch test: ', dax30ret_archtest)
+    sseret_archtest = diagnostic.het_arch(sse_ret)
+    print('SSE arch test: ', sseret_archtest)
+
+    # Square returns
+    sp500_ret_squared = np.square(sp500_ret)
+    dax30_ret_squared = np.square(dax30_ret)
+    sse_ret_squared = np.square(sse_ret)
+
+    # Ploting the data
+    fig, axs = pyplot.subplots(
+        1, 3, sharey=False, figsize=(15, 8), constrained_layout=True)
+    fig.suptitle('Autocorrelation', fontsize=16)
+
+    # Setting the different subplots
+    fig = plot_acf(sp500_ret_squared, ax=axs[0], color='red')
+    axs[0].set_title('S&P 500')
+    fig = plot_acf(dax30_ret_squared, ax=axs[1], color='green')
+    axs[1].set_title('DAX 30')
+    fig = plot_acf(sse_ret_squared, ax=axs[2], color='blue')
+    axs[2].set_title('SSE')
+
+    pyplot.show()
 
 
 if __name__ == '__main__':
