@@ -19,26 +19,30 @@ Mean Squared Error (MSE) and Mean Absolute Error (MAE).
 """
 
 # Import necesary modules
-from datetime import datetime, timedelta
-import yfinance as yf
-import pandas as pd
-from pandas_datareader import data as pdr
-import numpy as np
-import scipy as sp
-import arch
-from random import gauss
-from random import seed
-from matplotlib import pyplot
-from arch import arch_model
-from statsmodels.graphics.tsaplots import plot_acf
-from statsmodels.graphics.tsaplots import plot_pacf
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 from statsmodels.stats import diagnostic
+from statsmodels.graphics.tsaplots import plot_pacf
+from statsmodels.graphics.tsaplots import plot_acf
+import sys
+import seaborn as sns
+from arch import arch_model
+from matplotlib import pyplot
+from random import seed
+from random import gauss
+import arch
+import scipy as sp
+import numpy as np
+from pandas_datareader import data as pdr
+import pandas as pd
+import yfinance as yf
+from datetime import datetime, timedelta
+import warnings
+warnings.simplefilter('ignore')
 
 
 def get_prices(ticker, start, end):
     """
     Get the Adj Close prices from the provided ticker using Yahoo Finance
-
     Parameters
     ==========
     ticker : string
@@ -54,18 +58,15 @@ def get_prices(ticker, start, end):
 
     return prices
 
-def get_daily_returns(prices):
-    """
-    Calculate and return Daily Returns based on provided prices
 
+def compute_returns(data):
+    """returns Daily Returns based on provided prices
     Parameters
     ==========
     prices : array
         Prices of stock
     """
-
-    data_ret = np.log(prices).diff().dropna()
-
+    data_ret = np.log(data).diff().dropna()
     return data_ret
 
 
@@ -73,9 +74,11 @@ def main():
     """
     Program's main entrypoint
     """
+    # Getting data
+
     # Define start data and end date
     start = "2019-01-01"
-    end = "31-03-31"
+    end = "2020-03-31"
 
     # Tickers
     sp500_ticker = "^GSPC"
@@ -91,58 +94,72 @@ def main():
 
     # Ploting the data
     fig, axs = pyplot.subplots(
-        1, 3, sharex=True, figsize=(14, 5), constrained_layout=True)
-    fig.suptitle('Prices', fontsize=16)
+        1, 3, sharex=True, figsize=(15, 5), constrained_layout=True)
+    fig.suptitle('Index Adj Close Price', fontsize=15)
+    fig.autofmt_xdate()
 
-    # Setting the different subplots
     axs[0].plot(sp500, color='red')
-    axs[0].set_title('S&P 500')
+    axs[0].set_title('S&P500')
     axs[1].plot(dax30, color='green')
-    axs[1].set_title('DAX 30')
+    axs[1].set_title('DAX30')
     axs[2].plot(sse, color='blue')
     axs[2].set_title('SSE')
 
+    fig.savefig('Images/prices')
+
+    # Computing daily returns
+
     # S&P500 daily returns
-    sp500_ret = get_daily_returns(sp500)
+    sp500_ret = compute_returns(sp500)
     # DAX30 daily returns
-    dax30_ret = get_daily_returns(dax30)
+    dax30_ret = compute_returns(dax30)
     # SSE daily returns
-    sse_ret = get_daily_returns(sse)
+    sse_ret = compute_returns(sse)
+
+    print(sse_ret.shape)
+    print(sse_ret)
 
     # Ploting the histogram of daily returns
     n_bins = 10
 
-    fig, axs = pyplot.subplots(
-        1, 3, sharey=True, figsize=(15, 5), constrained_layout=True)
-    fig.suptitle('Returns', fontsize=16)
-
+    fig, axs = pyplot.subplots(1, 3, figsize=(15, 5), constrained_layout=True)
+    fig.suptitle('Histogram of returns', fontsize=15)
     # Setting the different subplots
+    # We can set the number of bins with the `bins` kwarg
     axs[0].hist(sp500_ret, bins=n_bins, color='red')
-    axs[0].set_title('S&P 500')
+    axs[0].set_title('S&P500')
     axs[1].hist(dax30_ret, bins=n_bins, color='green')
-    axs[1].set_title('DAX 30')
+    axs[1].set_title('DAX30')
     axs[2].hist(sse_ret, bins=n_bins, color='blue')
     axs[2].set_title('SSE')
+
+    fig.savefig('Images/histogram')
 
     # Ploting ACF and PACF of returns
     fig, axs = pyplot.subplots(
         2, 3, sharey=False, figsize=(15, 8), constrained_layout=True)
-    fig.suptitle('Autocorrelation', fontsize=16)
+    fig.suptitle(
+        'Autocorrelation and Partial Autocorrelation of returns', fontsize=15)
 
     # ACF and PACF of S&P500 daily returns
     fig = plot_acf(sp500_ret, ax=axs[0, 0], color='red')
     fig = plot_pacf(sp500_ret, ax=axs[1, 0], color='red')
-    axs[0, 0].set_title('S&P 500')
+    axs[0, 0].set_title('S&P500 Autocorrelation')
+    axs[1, 0].set_title('S&P500 Partial Autocorrelation')
 
     # ACF and PACF of DAX30 daily returns
     fig = plot_acf(dax30_ret, ax=axs[0, 1], color='green')
     fig = plot_pacf(dax30_ret, ax=axs[1, 1], color='green')
-    axs[0, 1].set_title('DAX 30')
+    axs[0, 1].set_title('DAX30 Autocorrelation')
+    axs[1, 1].set_title('DAX30 Partial Autocorrelation')
 
     # ACF and PACF of SSE daily returns
     fig = plot_acf(sse_ret, ax=axs[0, 2], color='blue')
     fig = plot_pacf(sse_ret, ax=axs[1, 2], color='blue')
-    axs[0, 2].set_title('SSE')
+    axs[0, 2].set_title('SSE Autocorrelation')
+    axs[1, 2].set_title('SSE Partial Autocorrelation')
+
+    fig.savefig('Images/autocorrelation_partialautocorrelation')
 
     # ARCH effect test on series of returns
     sp500ret_archtest = diagnostic.het_arch(sp500_ret)
@@ -160,16 +177,177 @@ def main():
     # Ploting the data
     fig, axs = pyplot.subplots(
         1, 3, sharey=False, figsize=(15, 8), constrained_layout=True)
-    fig.suptitle('Autocorrelation', fontsize=16)
+    fig.suptitle('Autocorrelation of squared returns', fontsize=15)
 
     # Setting the different subplots
     fig = plot_acf(sp500_ret_squared, ax=axs[0], color='red')
-    axs[0].set_title('S&P 500')
+    axs[0].set_title('S&P500 autocorrelation')
     fig = plot_acf(dax30_ret_squared, ax=axs[1], color='green')
-    axs[1].set_title('DAX 30')
+    axs[1].set_title('DAX30 autocorrelation')
     fig = plot_acf(sse_ret_squared, ax=axs[2], color='blue')
-    axs[2].set_title('SSE')
+    axs[2].set_title('SSE autocorrelation')
 
+    fig.savefig('Images/autocorrelation_squared_returns')
+
+    # GARCH model rolling window estimation S&P500
+
+    # GARCH model specification
+    gm_sp500 = arch_model(sp500_ret, vol='Garch', p=11, q=11, dist='Normal')
+
+    # Rolling window estimation
+    sp500_index = sp500_ret.index
+    start_loc = 0
+    end_loc = np.where(sp500_index >= '2020-03-03')[0].min()
+    sp500_forecasts = {}
+    for i in range(22):
+        sys.stdout.write('.')
+        sys.stdout.flush()
+        sp500_res = gm_sp500.fit(first_obs=i, last_obs=i + end_loc, disp='off')
+        sp500_temp = sp500_res.forecast(horizon=10).variance
+        sp500_fcast = sp500_temp.iloc[i + end_loc - 1]
+        sp500_forecasts[sp500_fcast.name] = sp500_fcast
+    print()
+    print(pd.DataFrame(sp500_forecasts).T)
+
+    # Rolling window estimation of realized variance
+    w = 22
+
+    sp500_roller = sp500_ret.rolling(w)
+    sp500_var = sp500_roller.var(ddof=0)
+    sp500_var = pd.DataFrame(sp500_var)
+    print(sp500_var.tail(22))
+
+    # Merge forecasted variance with realized variance into one DataFrame
+    sp500_forecast = pd.DataFrame(sp500_forecasts).T
+    sp500_forecast_real = pd.concat(
+        [sp500_forecast, sp500_var], axis=1).dropna()
+    print(sp500_forecast_real)
+
+    # Mean squared error S&P500
+    sp500_mse = mean_squared_error(
+        sp500_forecast_real['h.10'], sp500_forecast_real['Adj Close'])
+    print('Mean Squared Error S&P500: ', sp500_mse)
+
+    # Mean absolute error S&P500
+    sp500_mae = mean_absolute_error(
+        sp500_forecast_real['h.10'], sp500_forecast_real['Adj Close'])
+    print('Mean Absolute Error S&P500: ', sp500_mae)
+
+    # Plot forecasted variance against realized variance
+    pyplot.title('S&P500 forecast variance vs S&P500 realized variance')
+    pyplot.plot(sp500_forecast_real['h.10'], label='forecast')
+    pyplot.plot(sp500_forecast_real['Adj Close'], label='realized')
+    pyplot.legend()
+    pyplot.tight_layout()
+    pyplot.xticks(rotation=45)
+    pyplot.savefig('Images/sp500_forecast_realized')
+    pyplot.show()
+
+    # GARCH model rolling window estimation DAX30
+
+    # GARCH model specification
+    gm_dax30 = arch_model(dax30_ret, vol='Garch', p=11, q=11, dist='Normal')
+
+    # Rolling window estimation
+    dax30_index = dax30_ret.index
+    start_loc = 0
+    end_loc = np.where(dax30_index >= '2020-03-03')[0].min()
+    dax30_forecasts = {}
+    for i in range(22):
+        sys.stdout.write('.')
+        sys.stdout.flush()
+        dax30_res = gm_dax30.fit(first_obs=i, last_obs=i + end_loc, disp='off')
+        dax30_temp = dax30_res.forecast(horizon=10).variance
+        dax30_fcast = dax30_temp.iloc[i + end_loc - 1]
+        dax30_forecasts[dax30_fcast.name] = dax30_fcast
+    print()
+    print(pd.DataFrame(dax30_forecasts).T)
+
+    # Rolling window estimation of realized variance
+    w = 22
+
+    dax30_roller = dax30_ret.rolling(w)
+    dax30_var = dax30_roller.var(ddof=0)
+    dax30_var = pd.DataFrame(dax30_var)
+    print(dax30_var.tail(22))
+
+    # Merge forecasted variance with realized variance into one DataFrame
+    dax30_forecast = pd.DataFrame(dax30_forecasts).T
+    dax30_forecast_real = pd.concat(
+        [dax30_forecast, dax30_var], axis=1).dropna()
+    print(dax30_forecast_real)
+
+    # Mean squared error DAX30
+    dax30_mse = mean_squared_error(
+        dax30_forecast_real['h.10'], dax30_forecast_real['Adj Close'])
+    print('Mean Squared Error DAX30: ', dax30_mse)
+
+    # Mean absolute error DAX30
+    dax30_mae = mean_absolute_error(
+        dax30_forecast_real['h.10'], dax30_forecast_real['Adj Close'])
+    print('Mean Absolute Error DAX30: ', dax30_mae)
+
+    # Plot forecasted variance against realized variance
+    pyplot.title('DAX30 forecast variance vs DAX30 realized variance')
+    pyplot.plot(dax30_forecast_real['h.10'], label='forecast')
+    pyplot.plot(dax30_forecast_real['Adj Close'], label='realized')
+    pyplot.legend()
+    pyplot.tight_layout()
+    pyplot.xticks(rotation=45)
+    pyplot.savefig('Images/dax30_forecast_realized')
+    pyplot.show()
+
+    # GARCH model rolling window estimation SSE
+
+    # GARCH model specification
+    gm_sse = arch_model(sse_ret, vol='Garch', p=11, q=11, dist='Normal')
+
+    # Rolling window estimation
+    sse_index = sse_ret.index
+    start_loc = 0
+    end_loc = np.where(sse_index >= '2020-03-03')[0].min()
+    sse_forecasts = {}
+    for i in range(22):
+        sys.stdout.write('.')
+        sys.stdout.flush()
+        sse_res = gm_sse.fit(first_obs=i, last_obs=i + end_loc, disp='off')
+        sse_temp = sse_res.forecast(horizon=10).variance
+        sse_fcast = sse_temp.iloc[i + end_loc - 1]
+        sse_forecasts[sse_fcast.name] = sse_fcast
+    print()
+    print(pd.DataFrame(sse_forecasts).T)
+
+    # Rolling window estimation of realized variance
+    w = 22
+
+    sse_roller = sse_ret.rolling(w)
+    sse_var = sse_roller.var(ddof=0)
+    sse_var = pd.DataFrame(sse_var)
+    print(sse_var.tail(22))
+
+    # Merge forecasted variance with realized variance into one DataFrame
+    sse_forecast = pd.DataFrame(sse_forecasts).T
+    sse_forecast_real = pd.concat([sse_forecast, sse_var], axis=1).dropna()
+    print(sse_forecast_real)
+
+    # Mean squared error SSE
+    sse_mse = mean_squared_error(
+        sse_forecast_real['h.10'], sse_forecast_real['Adj Close'])
+    print('Mean Squared Error SSE: ', sse_mse)
+
+    # Mean absolute error SSE
+    sse_mae = mean_absolute_error(
+        sse_forecast_real['h.10'], sse_forecast_real['Adj Close'])
+    print('Mean Absolute Error SSE: ', sse_mae)
+
+    # Plot forecasted variance against realized variance
+    pyplot.title('SSE forecast variance vs SSE realized variance')
+    pyplot.plot(sse_forecast_real['h.10'], label='forecast')
+    pyplot.plot(sse_forecast_real['Adj Close'], label='realized')
+    pyplot.legend()
+    pyplot.tight_layout()
+    pyplot.xticks(rotation=45)
+    pyplot.savefig('Images/sse_forecast_realized')
     pyplot.show()
 
 
