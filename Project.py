@@ -106,6 +106,7 @@ def main():
     axs[2].set_title('SSE')
 
     fig.savefig('Images/prices')
+    pyplot.close()
 
     # Computing daily returns
 
@@ -134,6 +135,7 @@ def main():
     axs[2].set_title('SSE')
 
     fig.savefig('Images/histogram')
+    pyplot.close()
 
     # Ploting ACF and PACF of returns
     fig, axs = pyplot.subplots(
@@ -160,6 +162,7 @@ def main():
     axs[1, 2].set_title('SSE Partial Autocorrelation')
 
     fig.savefig('Images/autocorrelation_partialautocorrelation')
+    pyplot.close()
 
     # ARCH effect test on series of returns
     sp500ret_archtest = diagnostic.het_arch(sp500_ret)
@@ -188,6 +191,7 @@ def main():
     axs[2].set_title('SSE autocorrelation')
 
     fig.savefig('Images/autocorrelation_squared_returns')
+    pyplot.close()
 
     # GARCH model rolling window estimation S&P500
 
@@ -234,6 +238,7 @@ def main():
     print('Mean Absolute Error S&P500: ', sp500_mae)
 
     # Plot forecasted variance against realized variance
+    pyplot.close()
     pyplot.title('S&P500 forecast variance vs S&P500 realized variance')
     pyplot.plot(sp500_forecast_real['h.10'], label='forecast')
     pyplot.plot(sp500_forecast_real['Adj Close'], label='realized')
@@ -241,7 +246,7 @@ def main():
     pyplot.tight_layout()
     pyplot.xticks(rotation=45)
     pyplot.savefig('Images/sp500_forecast_realized')
-    pyplot.show()
+    pyplot.close()
 
     # GARCH model rolling window estimation DAX30
 
@@ -295,7 +300,7 @@ def main():
     pyplot.tight_layout()
     pyplot.xticks(rotation=45)
     pyplot.savefig('Images/dax30_forecast_realized')
-    pyplot.show()
+    pyplot.close()
 
     # GARCH model rolling window estimation SSE
 
@@ -348,7 +353,7 @@ def main():
     pyplot.tight_layout()
     pyplot.xticks(rotation=45)
     pyplot.savefig('Images/sse_forecast_realized')
-    pyplot.show()
+    pyplot.close()
 
 
 if __name__ == '__main__':
