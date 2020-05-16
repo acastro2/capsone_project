@@ -196,7 +196,7 @@ def main():
     # GARCH model rolling window estimation S&P500
 
     # GARCH model specification
-    gm_sp500 = arch_model(sp500_ret, vol='Garch', p=11, q=11, dist='Normal')
+    gm_sp500 = arch_model(sp500_ret, vol='Garch', p=1, q=1, dist='Normal')
 
     # Rolling window estimation
     sp500_index = sp500_ret.index
@@ -243,15 +243,15 @@ def main():
     pyplot.plot(sp500_forecast_real['h.10'], label='forecast')
     pyplot.plot(sp500_forecast_real['Adj Close'], label='realized')
     pyplot.legend()
-    pyplot.tight_layout()
     pyplot.xticks(rotation=45)
+    pyplot.tight_layout()
     pyplot.savefig('Images/sp500_forecast_realized')
     pyplot.close()
 
     # GARCH model rolling window estimation DAX30
 
     # GARCH model specification
-    gm_dax30 = arch_model(dax30_ret, vol='Garch', p=11, q=11, dist='Normal')
+    gm_dax30 = arch_model(dax30_ret, vol='Garch', p=1, q=1, dist='Normal')
 
     # Rolling window estimation
     dax30_index = dax30_ret.index
@@ -297,15 +297,15 @@ def main():
     pyplot.plot(dax30_forecast_real['h.10'], label='forecast')
     pyplot.plot(dax30_forecast_real['Adj Close'], label='realized')
     pyplot.legend()
-    pyplot.tight_layout()
     pyplot.xticks(rotation=45)
+    pyplot.tight_layout()
     pyplot.savefig('Images/dax30_forecast_realized')
     pyplot.close()
 
     # GARCH model rolling window estimation SSE
 
     # GARCH model specification
-    gm_sse = arch_model(sse_ret, vol='Garch', p=11, q=11, dist='Normal')
+    gm_sse = arch_model(sse_ret, vol='Garch', p=1, q=1, dist='Normal')
 
     # Rolling window estimation
     sse_index = sse_ret.index
@@ -350,8 +350,8 @@ def main():
     pyplot.plot(sse_forecast_real['h.10'], label='forecast')
     pyplot.plot(sse_forecast_real['Adj Close'], label='realized')
     pyplot.legend()
-    pyplot.tight_layout()
     pyplot.xticks(rotation=45)
+    pyplot.tight_layout()
     pyplot.savefig('Images/sse_forecast_realized')
     pyplot.close()
 
