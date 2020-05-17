@@ -11,7 +11,7 @@ Dep. Variable:              Adj Close   No. Observations:                 1261
 Model:                     ARMA(4, 2)   Log Likelihood               -1909.716
 Method:                           mle   S.D. of innovations              1.100
 Date:                Sun, 17 May 2020   AIC                           3833.431
-Time:                        15:56:42   BIC                           3869.409
+Time:                        20:07:55   BIC                           3869.409
 Sample:                             0   HQIC                          3846.951
                                                                               
 ===================================================================================
@@ -45,7 +45,7 @@ Distribution:      Standardized Student's t   AIC:                           369
 Method:                  Maximum Likelihood   BIC:                           3711.79
                                               No. Observations:                 1261
 Date:                      Sun, May 17 2020   Df Residuals:                     1257
-Time:                              15:56:44   Df Model:                            4
+Time:                              20:07:57   Df Model:                            4
                                 Mean Model                                
 ==========================================================================
                  coef    std err          t      P>|t|    95.0% Conf. Int.
@@ -74,7 +74,7 @@ Distribution:      Standardized Student's t   AIC:                           357
 Method:                  Maximum Likelihood   BIC:                           3605.23
                                               No. Observations:                 1261
 Date:                      Sun, May 17 2020   Df Residuals:                     1256
-Time:                              15:56:46   Df Model:                            5
+Time:                              20:07:58   Df Model:                            5
                                 Mean Model                                
 ==========================================================================
                  coef    std err          t      P>|t|    95.0% Conf. Int.
@@ -104,7 +104,7 @@ Distribution:      Standardized Student's t   AIC:                           358
 Method:                  Maximum Likelihood   BIC:                           3633.57
                                               No. Observations:                 1261
 Date:                      Sun, May 17 2020   Df Residuals:                     1252
-Time:                              15:56:48   Df Model:                            9
+Time:                              20:07:59   Df Model:                            9
                                 Mean Model                                
 ==========================================================================
                  coef    std err          t      P>|t|    95.0% Conf. Int.
@@ -126,6 +126,36 @@ beta[2]        0.4160      0.506      0.822      0.411      [ -0.575,  1.407]
                  coef    std err          t      P>|t|  95.0% Conf. Int.
 ------------------------------------------------------------------------
 nu             5.8426      0.981      5.953  2.630e-09 [  3.919,  7.766]
+========================================================================
+
+Covariance estimator: robust
+                        Constant Mean - GARCH Model Results                         
+====================================================================================
+Dep. Variable:                    Adj Close   R-squared:                      -0.003
+Mean Model:                   Constant Mean   Adj. R-squared:                 -0.003
+Vol Model:                            GARCH   Log-Likelihood:               -1969.07
+Distribution:      Standardized Student's t   AIC:                           3948.13
+Method:                  Maximum Likelihood   BIC:                           3974.15
+                                              No. Observations:                 1345
+Date:                      Sun, May 17 2020   Df Residuals:                     1340
+Time:                              20:08:01   Df Model:                            5
+                                Mean Model                                
+==========================================================================
+                 coef    std err          t      P>|t|    95.0% Conf. Int.
+--------------------------------------------------------------------------
+mu             0.0741  2.365e-02      3.132  1.739e-03 [2.771e-02,  0.120]
+                               Volatility Model                              
+=============================================================================
+                 coef    std err          t      P>|t|       95.0% Conf. Int.
+-----------------------------------------------------------------------------
+omega          0.0267  1.641e-02      1.630      0.103 [-5.414e-03,5.889e-02]
+alpha[1]       0.1160  3.719e-02      3.119  1.815e-03    [4.310e-02,  0.189]
+beta[1]        0.8749  4.014e-02     21.796 2.506e-105      [  0.796,  0.954]
+                              Distribution                              
+========================================================================
+                 coef    std err          t      P>|t|  95.0% Conf. Int.
+------------------------------------------------------------------------
+nu             5.2803      0.772      6.841  7.866e-12 [  3.767,  6.793]
 ========================================================================
 
 Covariance estimator: robust

@@ -391,6 +391,16 @@ def run_analysis(desc, symbol, start, end, end_slice, lags_, hist_n_bins_):
         plot_time_series(garch_best_std_resid ** 2, lags=lags_, filename=f'images/15_{desc}_garch_best_std_resid_square_analysis')
         plot_ljung_box_test(garch_best_std_resid ** 2, lags=lags_, filename=f'images/16_{desc}_garch_best_std_resid_square_ljung_analysis')
 
+        # GARCH Model fitting -> We are fitting two GARCHs, the first one is a GARCH(1,1). We selected
+        # this model because there are evidence in the literature that a GARCH(1,1) outperforms higher
+        # orders of GARCH models when checking the AIC criteria.
+        garch_1_1_full = fit_garch(log_returns_percent)
+        print(garch_1_1_full.summary(), file=f)
+        garch_1_1_full_std_resid = garch_1_1_full.resid / garch_1_1_full.conditional_volatility
+        plot_time_series(garch_1_1_full_std_resid, lags=lags_, filename=f'images/17_{desc}_garch_1_1_full_std_residuals_analysis')
+        plot_time_series(garch_1_1_full_std_resid ** 2, lags=lags_, filename=f'images/18_{desc}_garch_1_1_full_std_resid_square_analysis')
+        plot_ljung_box_test(garch_1_1_full_std_resid ** 2, lags=lags_, filename=f'images/19_{desc}_garch_1_1_full_std_resid_square_ljung_analysis')
+
 
 def main():
     """
