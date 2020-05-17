@@ -148,16 +148,33 @@ def _fit_garch_model(ts, best_order):
 
 spx_garch = _fit_garch_model(scaled_lrets[SPX].loc['2015-01-01':'2020-01-01'], res_tup_spx[1])
 p(spx_garch.summary())
+tsplot(spx_garch.resid, lags=30).savefig('images/spx_slice_garch_residuals_analysis')
+acf_pacf_plot(spx_garch.resid ** 2, lags=30).savefig('images/spx_slice_garch_squared_residuals_analysis')
+
+spx_garch = _fit_garch_model(scaled_lrets[SPX], res_tup_spx[1])
+p(spx_garch.summary())
 tsplot(spx_garch.resid, lags=30).savefig('images/spx_garch_residuals_analysis')
 acf_pacf_plot(spx_garch.resid ** 2, lags=30).savefig('images/spx_garch_squared_residuals_analysis')
 
+
 dax_garch = _fit_garch_model(scaled_lrets[DAX].loc['2015-01-01':'2020-01-01'], res_tup_dax[1])
+p(dax_garch.summary())
+tsplot(dax_garch.resid, lags=30).savefig('images/dax_slice_garch_residuals_analysis')
+acf_pacf_plot(dax_garch.resid ** 2, lags=30).savefig('images/dax_slice_garch_squared_residuals_analysis')
+
+dax_garch = _fit_garch_model(scaled_lrets[DAX], res_tup_dax[1])
 p(dax_garch.summary())
 tsplot(dax_garch.resid, lags=30).savefig('images/dax_garch_residuals_analysis')
 acf_pacf_plot(dax_garch.resid ** 2, lags=30).savefig('images/dax_garch_squared_residuals_analysis')
 
 
+
 sse_garch = _fit_garch_model(scaled_lrets[SSE].loc['2015-01-01':'2020-01-01'], res_tup_sse[1])
+p(sse_garch.summary())
+tsplot(sse_garch.resid, lags=30).savefig('images/sse_slice_garch_residuals_analysis')
+acf_pacf_plot(sse_garch.resid ** 2, lags=30).savefig('images/sse_slice_garch_squared_residuals_analysis')
+
+sse_garch = _fit_garch_model(scaled_lrets[SSE], res_tup_sse[1])
 p(sse_garch.summary())
 tsplot(sse_garch.resid, lags=30).savefig('images/sse_garch_residuals_analysis')
 acf_pacf_plot(sse_garch.resid ** 2, lags=30).savefig('images/sse_garch_squared_residuals_analysis')
