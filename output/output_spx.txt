@@ -11,7 +11,7 @@ Dep. Variable:              Adj Close   No. Observations:                 1257
 Model:                     ARMA(2, 4)   Log Likelihood               -1566.646
 Method:                           mle   S.D. of innovations              0.841
 Date:                Sun, 17 May 2020   AIC                           3147.292
-Time:                        20:07:33   BIC                           3183.247
+Time:                        22:10:47   BIC                           3183.247
 Sample:                             0   HQIC                          3160.805
                                                                               
 ===================================================================================
@@ -45,7 +45,7 @@ Distribution:      Standardized Student's t   AIC:                           283
 Method:                  Maximum Likelihood   BIC:                           2856.87
                                               No. Observations:                 1257
 Date:                      Sun, May 17 2020   Df Residuals:                     1253
-Time:                              20:07:34   Df Model:                            4
+Time:                              22:10:48   Df Model:                            4
                                 Mean Model                                
 ==========================================================================
                  coef    std err          t      P>|t|    95.0% Conf. Int.
@@ -74,7 +74,7 @@ Distribution:      Standardized Student's t   AIC:                           267
 Method:                  Maximum Likelihood   BIC:                           2698.86
                                               No. Observations:                 1257
 Date:                      Sun, May 17 2020   Df Residuals:                     1252
-Time:                              20:07:36   Df Model:                            5
+Time:                              22:10:49   Df Model:                            5
                                 Mean Model                                
 ==========================================================================
                  coef    std err          t      P>|t|    95.0% Conf. Int.
@@ -104,7 +104,7 @@ Distribution:      Standardized Student's t   AIC:                           267
 Method:                  Maximum Likelihood   BIC:                           2725.78
                                               No. Observations:                 1257
 Date:                      Sun, May 17 2020   Df Residuals:                     1248
-Time:                              20:07:37   Df Model:                            9
+Time:                              22:10:50   Df Model:                            9
                                 Mean Model                                
 ==========================================================================
                  coef    std err          t      P>|t|    95.0% Conf. Int.
@@ -138,7 +138,7 @@ Distribution:      Standardized Student's t   AIC:                           304
 Method:                  Maximum Likelihood   BIC:                           3066.69
                                               No. Observations:                 1341
 Date:                      Sun, May 17 2020   Df Residuals:                     1336
-Time:                              20:07:39   Df Model:                            5
+Time:                              22:10:51   Df Model:                            5
                                 Mean Model                                
 ==========================================================================
                  coef    std err          t      P>|t|    95.0% Conf. Int.

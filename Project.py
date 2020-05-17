@@ -284,7 +284,67 @@ def fit_garch(time_series, p=1, o=0, q=1):
     return am.fit(update_freq=5, disp='off')
 
 
-def run_analysis(desc, symbol, start, end, end_slice, lags_, hist_n_bins_):
+def plot_garch_forecast(full_data, garch_model, start_slice, end_slice, title=None, filename=None):
+    """Returns forecast plot figure of the provided data.
+
+    Parameters
+    ==========
+    data : series
+        One-dimensional ndarray with axis labels (including time series).
+    n_bins : {int, array_like}, optional
+        An int or array of number of histogram bins, used on horizontal axis.
+    filename : string
+        File to save the plot result
+    """
+
+    if not isinstance(full_data, pd.Series):
+        full_data = pd.Series(data).dropna()
+    with plt.style.context('bmh'):
+        fig = plt.figure(figsize=(10, 8))
+        layout = (2, 1)
+        sliced_data = full_data.loc[start_slice:end_slice]
+        sliced_volatility = garch_model.conditional_volatility.loc[start_slice:end_slice]
+        conf_interval_top = sliced_data + 2 * garch_model.conditional_volatility
+        conf_interval_bottom = sliced_data - 2 * garch_model.conditional_volatility
+        future_data = full_data.loc[end_slice:]
+
+        forecast = garch_model.forecast(horizon=len(future_data))
+        forecast_mean = pd.Series(forecast.mean.dropna().squeeze())
+        forecast_mean.index = future_data.index
+        volatility_mean = pd.Series(forecast.residual_variance.dropna().squeeze())
+        volatility_mean.index = future_data.index
+        error_mean = pd.Series(forecast.variance.dropna().squeeze())
+        error_mean.index = future_data.index
+        forecast_conf_interval_top = forecast_mean + 2 * np.sqrt(error_mean)
+        forecast_conf_interval_bottom = forecast_mean - 2 * np.sqrt(error_mean)
+        
+        returns_ax = plt.subplot2grid(layout, (0, 0))
+        volatility_ax = plt.subplot2grid(layout, (1, 0))
+        sliced_data.plot(ax=returns_ax, color='k', label='past', linewidth=1)
+        conf_interval_top.plot(ax=returns_ax, color='darkorange', linestyle='dashed', label='$past + 2\widehat{\sigma}_t$', linewidth=1)
+        conf_interval_bottom.plot(ax=returns_ax, color='darkorange', linestyle='dashed', label='$past - 2\widehat{\sigma}_t$', linewidth=1)
+        future_data.plot(ax=returns_ax, color='darkblue', linewidth=1, label='realized')
+        forecast_mean.plot(ax=returns_ax, color='darkgreen', linewidth=1, label='$\widehat{r}_{T+h}$')
+        forecast_conf_interval_top.plot(ax=returns_ax, color='green', linestyle='dashed', label='$\widehat{r}_{T+h} + 2 \sigma$', linewidth=1)
+        forecast_conf_interval_bottom.plot(ax=returns_ax, color='green', linestyle='dashed', label='$\widehat{r}_{T+h} - 2 \sigma$', linewidth=1)
+        returns_ax.fill_between(forecast_mean.index, forecast_conf_interval_bottom, forecast_conf_interval_top, color='honeydew')
+        returns_ax.axvline(x=end_slice, color='k', linestyle='dashed', linewidth=1)
+        returns_ax.legend()
+        returns_ax.set_title(title if title else 'Returns forecast ($r_t$)')
+
+        sliced_volatility.plot(ax=volatility_ax, color='k', label='past', linewidth=1)
+        volatility_mean.plot(ax=volatility_ax, color='darkgreen', linewidth=1, label='$\widehat{\sigma^2}_{T+h}$')
+        volatility_ax.axvline(x=end_slice, color='k', linestyle='dashed', linewidth=1)
+        volatility_ax.legend()
+        volatility_ax.set_title(title if title else 'Conditional volatility forecast ($\sigma^2$)')
+
+        plt.tight_layout()
+
+    fig.savefig(filename.lower())
+    plt.close()
+
+
+def run_analysis(desc, symbol, start, end, start_forecast, end_slice, lags_, hist_n_bins_):
     """
     Main script.
     """
@@ -328,7 +388,7 @@ def run_analysis(desc, symbol, start, end, end_slice, lags_, hist_n_bins_):
         # try to fit the best ARIMA model for each one of the series. Before we can fit a GARCH model,
         # we need to understand if there are certain characteristics as an outcome to other models being
         # estimated.
-        estimation_time_series = log_returns_percent.loc[start:end_slice]
+        estimation_time_series = log_returns_percent.loc[:end_slice]
 
         # Find Best ARIMA Model for fitting GARCH
         arima_best_aic, arima_best_order, arima_best_mdl = find_best_arima_model(estimation_time_series)
@@ -401,6 +461,8 @@ def run_analysis(desc, symbol, start, end, end_slice, lags_, hist_n_bins_):
         plot_time_series(garch_1_1_full_std_resid ** 2, lags=lags_, filename=f'images/18_{desc}_garch_1_1_full_std_resid_square_analysis')
         plot_ljung_box_test(garch_1_1_full_std_resid ** 2, lags=lags_, filename=f'images/19_{desc}_garch_1_1_full_std_resid_square_ljung_analysis')
 
+        plot_garch_forecast(log_returns_percent, garch_1_1, start_forecast, end_slice, filename=f'images/20_{desc}_garch_1_1_forecast')
+
 
 def main():
     """
@@ -409,6 +471,7 @@ def main():
 
     start = '2015-01-01'
     end = '2020-05-01'
+    start_forecast = '2019-01-01'
     end_slice = '2020-01-01'
 
     symbols = ['SPX', '^GSPC'], ['DAX', '^GDAXI'], ['SSE', 'SSE.L']
@@ -417,7 +480,7 @@ def main():
     hist_n_bins_ = 50
 
     for symbol in symbols:
-        run_analysis(symbol[0], symbol[1], start, end, end_slice, lags_, hist_n_bins_)
+        run_analysis(symbol[0], symbol[1], start, end, start_forecast, end_slice, lags_, hist_n_bins_)
 
 
 if __name__ == '__main__':
