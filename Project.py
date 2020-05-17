@@ -49,7 +49,7 @@ def get_prices(symbol, start, end):
 
     Returns
     =======
-    prices
+    series
         a list of daily prices
     """
 
@@ -64,9 +64,9 @@ def plot_time_series(data, lags=None, title=None, filename=None):
     ==========
     data : series
         One-dimensional ndarray with axis labels (including time series).
-    lags : {int, array_like}, optional
+    lags : {int, array_like}
         An int or array of lag values, used on horizontal axis.
-    title : string, optional
+    title : string
         The title that will be set for the whole figure.
     filename : string
         File to save the plot result
@@ -101,40 +101,6 @@ def plot_time_series(data, lags=None, title=None, filename=None):
     plt.close()
 
 
-def plot_acf_pacf(data, lags=None, filename=None):
-    """
-    Saves ACF PACF plot figure of the provided data in filename.
-
-    Parameters
-    ==========
-    data : series
-        One-dimensional ndarray with axis labels (including time series).
-    lags : {int, array_like}
-        An int or array of lag values, used on horizontal axis.
-    filename : string
-        File to save the plot result
-    """
-
-    if not isinstance(data, pd.Series):
-        data = pd.Series(data).dropna()
-
-    with plt.style.context('bmh'):
-        fig = plt.figure(figsize=(10, 3))
-        layout = (1, 2)
-        acf_ax = plt.subplot2grid(layout, (0, 0))
-        pacf_ax = plt.subplot2grid(layout, (0, 1))
-        smt.graphics.plot_acf(data, lags=lags, ax=acf_ax, alpha=0.5, zero=False)
-        smt.graphics.plot_pacf(data, lags=lags, ax=pacf_ax, alpha=0.5, zerop=False)
-        plt.sca(acf_ax)
-        plt.xticks(np.arange(1,  lags + 1, 2.0))
-        plt.sca(pacf_ax)
-        plt.xticks(np.arange(1,  lags + 1, 2.0))
-        plt.tight_layout()
-
-    fig.savefig(filename.lower())
-    plt.close()
-
-
 def plot_histogram(data, n_bins=None, title=None, filename=None):
     """
     Saves histogram plot figure of the provided data in filename.
@@ -143,8 +109,10 @@ def plot_histogram(data, n_bins=None, title=None, filename=None):
     ==========
     data : series
         One-dimensional ndarray with axis labels (including time series).
-    n_bins : {int, array_like}, optional
+    n_bins : {int, array_like}
         An int or array of number of histogram bins, used on horizontal axis.
+    title : string
+        The title that will be set for the whole figure.
     filename : string
         File to save the plot result
     """
@@ -175,8 +143,14 @@ def plot_ljung_box_test(data, lags=[10], title=None, filename=None):
 
     Returns
     =======
-    best_aic : float
-    best_order : float
+    data : series
+        One-dimensional ndarray with axis labels (including time series).
+    n_bins : {int, array_like}
+        An int or array of number of histogram bins, used on horizontal axis.
+    title : string
+        The title that will be set for the whole figure.
+    filename : string
+        File to save the plot result
     """
 
     if not isinstance(data, pd.Series):
@@ -299,8 +273,14 @@ def plot_garch_forecast(full_data, garch_model, start_slice, end_slice, desc=Non
     ==========
     full_data : series
         One-dimensional ndarray with axis labels (including time series).
-    n_bins : {int, array_like}, optional
-        An int or array of number of histogram bins, used on horizontal axis.
+    garch_model : ARCHModelResult
+        GARCH Model for Forecast plotting
+    start_slice : datetime
+        start date of the slice
+    end_slice : datetime
+        end date of the slice
+    desc : string
+        Symbol naming for proper plot
     filename : string
         File to save the plot result
     """
