@@ -23,7 +23,6 @@ import sys
 import arch
 import pandas as pd
 import pandas_datareader.data as web
-from pandas._testing import assert_frame_equal
 import numpy as np
 import statsmodels.formula.api as smf
 import statsmodels.tsa.api as smt
@@ -36,7 +35,8 @@ import matplotlib as mpl
 
 
 def get_prices(symbol, start, end):
-    """Get the Adj Close prices from the provided ticker using Yahoo Finance
+    """
+    Returns the Adj Close prices from the provided ticker using Yahoo Finance
 
     Parameters
     ==========
@@ -57,7 +57,8 @@ def get_prices(symbol, start, end):
 
 
 def plot_time_series(data, lags=None, title=None, filename=None):
-    """Return time series plot figure of the provided data.
+    """
+    Saves time series plot figure of the provided data in filename.
 
     Parameters
     ==========
@@ -101,7 +102,8 @@ def plot_time_series(data, lags=None, title=None, filename=None):
 
 
 def plot_acf_pacf(data, lags=None, filename=None):
-    """Return ACF PACF plot figure of the provided data.
+    """
+    Saves ACF PACF plot figure of the provided data in filename.
 
     Parameters
     ==========
@@ -134,7 +136,8 @@ def plot_acf_pacf(data, lags=None, filename=None):
 
 
 def plot_histogram(data, n_bins=None, title=None, filename=None):
-    """Returns histogram plot figure of the provided data.
+    """
+    Saves histogram plot figure of the provided data in filename.
 
     Parameters
     ==========
@@ -162,7 +165,8 @@ def plot_histogram(data, n_bins=None, title=None, filename=None):
 
 
 def plot_ljung_box_test(data, lags=[10], title=None, filename=None):
-    """Return best ARIMA model for provided Time Series.
+    """
+    Saves Ljung-box Test plot figure of the provided data in filename.
 
     Parameters
     ==========
@@ -197,7 +201,8 @@ def plot_ljung_box_test(data, lags=[10], title=None, filename=None):
 
 
 def find_best_arima_model(time_series):
-    """Return best ARIMA model for provided Time Series.
+    """
+    Return best ARIMA model for provided Time Series.
 
     Parameters
     ==========
@@ -235,7 +240,8 @@ def find_best_arima_model(time_series):
 
 
 def fit_arch(time_series, q=1):
-    """Return fit ARCH Model
+    """
+    Return fit ARCH Model
 
     Parameters
     ==========
@@ -258,7 +264,8 @@ def fit_arch(time_series, q=1):
 
 
 def fit_garch(time_series, p=1, o=0, q=1):
-    """Return fit GARCH Model
+    """
+    Returns fitted GARCH Model
 
     Parameters
     ==========
@@ -284,12 +291,13 @@ def fit_garch(time_series, p=1, o=0, q=1):
     return am.fit(update_freq=5, disp='off')
 
 
-def plot_garch_forecast(full_data, garch_model, start_slice, end_slice, title=None, filename=None):
-    """Returns forecast plot figure of the provided data.
+def plot_garch_forecast(full_data, garch_model, start_slice, end_slice, desc=None, filename=None):
+    """
+    Saves forecast plot figure of the provided data in filename.
 
     Parameters
     ==========
-    data : series
+    full_data : series
         One-dimensional ndarray with axis labels (including time series).
     n_bins : {int, array_like}, optional
         An int or array of number of histogram bins, used on horizontal axis.
@@ -298,7 +306,8 @@ def plot_garch_forecast(full_data, garch_model, start_slice, end_slice, title=No
     """
 
     if not isinstance(full_data, pd.Series):
-        full_data = pd.Series(data).dropna()
+        full_data = pd.Series(full_data).dropna()
+
     with plt.style.context('bmh'):
         fig = plt.figure(figsize=(10, 8))
         layout = (2, 1)
@@ -317,7 +326,7 @@ def plot_garch_forecast(full_data, garch_model, start_slice, end_slice, title=No
         error_mean.index = future_data.index
         forecast_conf_interval_top = forecast_mean + 2 * np.sqrt(error_mean)
         forecast_conf_interval_bottom = forecast_mean - 2 * np.sqrt(error_mean)
-        
+
         returns_ax = plt.subplot2grid(layout, (0, 0))
         volatility_ax = plt.subplot2grid(layout, (1, 0))
         sliced_data.plot(ax=returns_ax, color='k', label='past', linewidth=1)
@@ -330,13 +339,13 @@ def plot_garch_forecast(full_data, garch_model, start_slice, end_slice, title=No
         returns_ax.fill_between(forecast_mean.index, forecast_conf_interval_bottom, forecast_conf_interval_top, color='honeydew')
         returns_ax.axvline(x=end_slice, color='k', linestyle='dashed', linewidth=1)
         returns_ax.legend()
-        returns_ax.set_title(title if title else 'Returns forecast ($r_t$)')
+        returns_ax.set_title(f'Returns forecast for {desc} ($r_t$)')
 
         sliced_volatility.plot(ax=volatility_ax, color='k', label='past', linewidth=1)
         volatility_mean.plot(ax=volatility_ax, color='darkgreen', linewidth=1, label='$\widehat{\sigma^2}_{T+h}$')
         volatility_ax.axvline(x=end_slice, color='k', linestyle='dashed', linewidth=1)
         volatility_ax.legend()
-        volatility_ax.set_title(title if title else 'Conditional volatility forecast ($\sigma^2$)')
+        volatility_ax.set_title(f'Conditional volatility forecast for {desc} ($\sigma^2$)')
 
         plt.tight_layout()
 
@@ -397,71 +406,91 @@ def run_analysis(desc, symbol, start, end, start_forecast, end_slice, lags_, his
 
         # Now lets see how our ARIMA models are performing.
         print(f'-----------------------------------------------------------------------------\n'
-            f'{desc} ARIMA {arima_best_order}\n'
-            f'-----------------------------------------------------------------------------\n'
-            f'{arima_best_mdl.summary()}\n', file=f)
+              f'{desc} ARIMA {arima_best_order}\n'
+              f'-----------------------------------------------------------------------------\n'
+              f'{arima_best_mdl.summary()}\n', file=f)
 
         # Lets check for the presence of arch effects in the data.
         arch_test = sms.diagnostic.het_arch(arima_best_mdl.resid, ddof=arima_best_order[0] + arima_best_order[2])
         print(f"Engle's test for ARCH Effects for log-returns of {desc}: {arch_test}", file=f)
 
-        plot_time_series(arima_best_mdl.resid, lags=lags_, title=f'Time series property for arima residuals of {desc}', filename=f'images/4_{desc}_arima_resid_analysis')
+        plot_time_series(arima_best_mdl.resid, lags=lags_, title=f'Time series property for ARIMA residuals of {desc}', filename=f'images/4_{desc}_arima_resid_analysis')
 
         # Ljung-Box test of the residuals, if the values are higher than the significance level, there
         # are no evidences to reject the null hypothesis that the data is independently distributed, or
         # not exhibiting serial correlation.
-        plot_ljung_box_test(arima_best_mdl.resid, lags=lags_, title=f'Ljung-Box test for arima residuals of {desc}', filename=f'images/5_{desc}_arima_resid_ljung_analysis')
+        plot_ljung_box_test(arima_best_mdl.resid, lags=lags_, title=f'Ljung-Box test for ARIMA residuals of {desc}', filename=f'images/5_{desc}_arima_resid_ljung_analysis')
 
         # As of here, the ARIMA looks like a good model, because its residues seems to be white noise.
         # We now need to understand if there is a relationship in the square of the residuals, which
         # would imply existence of ARCH effects.
-        plot_time_series(arima_best_mdl.resid ** 2, lags=lags_, title=f'Time series property for squared arima residuals of {desc}', filename=f'images/6_{desc}_arima_resid_square_analysis')
+        plot_time_series(arima_best_mdl.resid ** 2, lags=lags_, title=f'Time series property for squared ARIMA residuals of {desc}', filename=f'images/6_{desc}_arima_resid_square_analysis')
 
         # The Ljung-Box test on the square of the residuals of the ARIMA model show exactly the expected
         # behaviour of having correlation. We need to fit a model with ARCH characteristics.
 
-        plot_ljung_box_test(arima_best_mdl.resid ** 2, lags=lags_, title=f'Ljung-Box test for arima residuals of {desc}', filename=f'images/7_{desc}_arima_square_resid_ljung_analysis')
+        plot_ljung_box_test(arima_best_mdl.resid ** 2, lags=lags_, title=f'Ljung-Box test for ARIMA residuals of {desc}', filename=f'images/7_{desc}_arima_square_resid_ljung_analysis')
 
         # ARCH Model fitting -> We are fitting one ARCH, to check whether we need to do a GARCH, then
         # checking the standardized squared residuals of the model we fitted, we see the existence of
         # autocorrelation, which leads to the need of a GARCH model.
         arch_1 = fit_arch(estimation_time_series)
-        print(arch_1.summary(), file=f)
         arch_1_std_resid = arch_1.resid / arch_1.conditional_volatility
-        plot_time_series(arch_1_std_resid, lags=lags_, filename=f'images/8_{desc}_arch_1_std_residuals_analysis')
-        plot_time_series(arch_1_std_resid ** 2, lags=lags_, filename=f'images/9_{desc}_arch_1_std_resid_square_analysis')
-        plot_ljung_box_test(arch_1_std_resid ** 2, lags=lags_, filename=f'images/10_{desc}_arch_1_std_resid_square_ljung_analysis')
+
+        print(f'-----------------------------------------------------------------------------\n'
+              f'{desc} ARCH(1)\n'
+              f'-----------------------------------------------------------------------------\n'
+              f'{arch_1.summary()}\n', file=f)
+
+        plot_time_series(arch_1_std_resid, lags=lags_, title=f'Time series property for ARCH(1) residuals of {desc}', filename=f'images/8_{desc}_arch_1_std_residuals_analysis')
+        plot_time_series(arch_1_std_resid ** 2, lags=lags_, title=f'Time series property for squared ARCH(1) residuals of {desc}', filename=f'images/9_{desc}_arch_1_std_resid_square_analysis')
+        plot_ljung_box_test(arch_1_std_resid ** 2, lags=lags_, title=f'Ljung-Box test for ARCH(1) residuals of {desc}', filename=f'images/10_{desc}_arch_1_std_resid_square_ljung_analysis')
 
         # GARCH Model fitting -> We are fitting two GARCHs, the first one is a GARCH(1,1). We selected
         # this model because there are evidence in the literature that a GARCH(1,1) outperforms higher
         # orders of GARCH models when checking the AIC criteria.
         garch_1_1 = fit_garch(estimation_time_series)
-        print(garch_1_1.summary(), file=f)
         garch_1_1_std_resid = garch_1_1.resid / garch_1_1.conditional_volatility
-        plot_time_series(garch_1_1_std_resid, lags=lags_, filename=f'images/11_{desc}_garch_1_1_std_residuals_analysis')
-        plot_time_series(garch_1_1_std_resid ** 2, lags=lags_, filename=f'images/12_{desc}_garch_1_1_std_resid_square_analysis')
-        plot_ljung_box_test(garch_1_1_std_resid ** 2, lags=lags_, filename=f'images/13_{desc}_garch_1_1_std_resid_square_ljung_analysis')
+
+        print(f'-----------------------------------------------------------------------------\n'
+              f'{desc} GARCH(1,1)\n'
+              f'-----------------------------------------------------------------------------\n'
+              f'{garch_1_1.summary()}\n', file=f)
+
+        plot_time_series(garch_1_1_std_resid, lags=lags_, title=f'Time series property for GARCH(1,1) residuals of {desc}', filename=f'images/11_{desc}_garch_1_1_std_residuals_analysis')
+        plot_time_series(garch_1_1_std_resid ** 2, lags=lags_, title=f'Time series property for squared GARCH(1,1) residuals of {desc}', filename=f'images/12_{desc}_garch_1_1_std_resid_square_analysis')
+        plot_ljung_box_test(garch_1_1_std_resid ** 2, lags=lags_, title=f'Ljung-Box test for GARCH(1,1) residuals of {desc}', filename=f'images/13_{desc}_garch_1_1_std_resid_square_ljung_analysis')
 
         # The second model is a GARCH that uses the best ARIMA estimation for p, o and q to check if
         # this model outperforms the previous one.
         garch_best = fit_garch(estimation_time_series, arima_best_order[0], arima_best_order[1], arima_best_order[2])
-        print(garch_best.summary(), file=f)
         garch_best_std_resid = garch_best.resid / garch_best.conditional_volatility
-        plot_time_series(garch_best_std_resid, lags=lags_, filename=f'images/14_{desc}_garch_best_std_resid_square_analysis')
-        plot_time_series(garch_best_std_resid ** 2, lags=lags_, filename=f'images/15_{desc}_garch_best_std_resid_square_analysis')
-        plot_ljung_box_test(garch_best_std_resid ** 2, lags=lags_, filename=f'images/16_{desc}_garch_best_std_resid_square_ljung_analysis')
+
+        print(f'-----------------------------------------------------------------------------\n'
+              f'{desc} GARCH with ARIMA estimations\n'
+              f'-----------------------------------------------------------------------------\n'
+              f'{garch_best.summary()}\n', file=f)
+
+        plot_time_series(garch_best_std_resid, lags=lags_,  title=f'Time series property for GARCH with ARIMA estimation residuals of {desc}', filename=f'images/14_{desc}_garch_best_std_resid_square_analysis')
+        plot_time_series(garch_best_std_resid ** 2, lags=lags_, title=f'Time series property for squared GARCH with ARIMA estimation residuals of {desc}', filename=f'images/15_{desc}_garch_best_std_resid_square_analysis')
+        plot_ljung_box_test(garch_best_std_resid ** 2, lags=lags_, title=f'Ljung-Box test for GARCH with ARIMA estimation residuals of {desc}', filename=f'images/16_{desc}_garch_best_std_resid_square_ljung_analysis')
 
         # GARCH Model fitting -> We are fitting two GARCHs, the first one is a GARCH(1,1). We selected
         # this model because there are evidence in the literature that a GARCH(1,1) outperforms higher
         # orders of GARCH models when checking the AIC criteria.
         garch_1_1_full = fit_garch(log_returns_percent)
-        print(garch_1_1_full.summary(), file=f)
         garch_1_1_full_std_resid = garch_1_1_full.resid / garch_1_1_full.conditional_volatility
-        plot_time_series(garch_1_1_full_std_resid, lags=lags_, filename=f'images/17_{desc}_garch_1_1_full_std_residuals_analysis')
-        plot_time_series(garch_1_1_full_std_resid ** 2, lags=lags_, filename=f'images/18_{desc}_garch_1_1_full_std_resid_square_analysis')
-        plot_ljung_box_test(garch_1_1_full_std_resid ** 2, lags=lags_, filename=f'images/19_{desc}_garch_1_1_full_std_resid_square_ljung_analysis')
 
-        plot_garch_forecast(log_returns_percent, garch_1_1, start_forecast, end_slice, filename=f'images/20_{desc}_garch_1_1_forecast')
+        print(f'-----------------------------------------------------------------------------\n'
+              f'{desc} GARCH(1,1) estimation with COVID-19\n'
+              f'-----------------------------------------------------------------------------\n'
+              f'{garch_1_1_full.summary()}\n', file=f)
+
+        plot_time_series(garch_1_1_full_std_resid, lags=lags_, title=f'Time series property for GARCH(1,1) estimation with COVID-19 residuals of {desc}', filename=f'images/17_{desc}_garch_1_1_full_std_residuals_analysis')
+        plot_time_series(garch_1_1_full_std_resid ** 2, lags=lags_, title=f'Time series property for squared GARCH(1,1) estimation with COVID-19 residuals of {desc}', filename=f'images/18_{desc}_garch_1_1_full_std_resid_square_analysis')
+        plot_ljung_box_test(garch_1_1_full_std_resid ** 2, lags=lags_, title=f'Ljung-Box test for GARCH(1,1) estimation with COVID-19 residuals of {desc}', filename=f'images/19_{desc}_garch_1_1_full_std_resid_square_ljung_analysis')
+
+        plot_garch_forecast(log_returns_percent, garch_1_1, start_forecast, end_slice, filename=f'images/20_{desc}_garch_1_1_forecast', desc=desc)
 
 
 def main():

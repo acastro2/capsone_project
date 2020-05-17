@@ -11,7 +11,7 @@ Dep. Variable:              Adj Close   No. Observations:                 1261
 Model:                     ARMA(4, 2)   Log Likelihood               -1909.716
 Method:                           mle   S.D. of innovations              1.100
 Date:                Sun, 17 May 2020   AIC                           3833.431
-Time:                        22:11:05   BIC                           3869.409
+Time:                        18:50:22   BIC                           3869.409
 Sample:                             0   HQIC                          3846.951
                                                                               
 ===================================================================================
@@ -36,6 +36,9 @@ MA.2            0.3866           +1.2867j            1.3435            0.2035
 -----------------------------------------------------------------------------
 
 Engle's test for ARCH Effects for log-returns of DAX: (128.9531116941529, 9.93298121989475e-17, 6.170618590015852, 6.623141196196086e-18)
+-----------------------------------------------------------------------------
+DAX ARCH(1)
+-----------------------------------------------------------------------------
                          Constant Mean - ARCH Model Results                         
 ====================================================================================
 Dep. Variable:                    Adj Close   R-squared:                      -0.002
@@ -45,7 +48,7 @@ Distribution:      Standardized Student's t   AIC:                           369
 Method:                  Maximum Likelihood   BIC:                           3711.79
                                               No. Observations:                 1261
 Date:                      Sun, May 17 2020   Df Residuals:                     1257
-Time:                              22:11:06   Df Model:                            4
+Time:                              18:50:23   Df Model:                            4
                                 Mean Model                                
 ==========================================================================
                  coef    std err          t      P>|t|    95.0% Conf. Int.
@@ -65,6 +68,10 @@ nu             4.3060      0.551      7.821  5.253e-15 [  3.227,  5.385]
 ========================================================================
 
 Covariance estimator: robust
+
+-----------------------------------------------------------------------------
+DAX GARCH(1,1)
+-----------------------------------------------------------------------------
                         Constant Mean - GARCH Model Results                         
 ====================================================================================
 Dep. Variable:                    Adj Close   R-squared:                      -0.002
@@ -74,7 +81,7 @@ Distribution:      Standardized Student's t   AIC:                           357
 Method:                  Maximum Likelihood   BIC:                           3605.23
                                               No. Observations:                 1261
 Date:                      Sun, May 17 2020   Df Residuals:                     1256
-Time:                              22:11:07   Df Model:                            5
+Time:                              18:50:25   Df Model:                            5
                                 Mean Model                                
 ==========================================================================
                  coef    std err          t      P>|t|    95.0% Conf. Int.
@@ -95,6 +102,10 @@ nu             5.8471      1.000      5.847  5.019e-09 [  3.887,  7.807]
 ========================================================================
 
 Covariance estimator: robust
+
+-----------------------------------------------------------------------------
+DAX GARCH with ARIMA estimations
+-----------------------------------------------------------------------------
                         Constant Mean - GARCH Model Results                         
 ====================================================================================
 Dep. Variable:                    Adj Close   R-squared:                      -0.002
@@ -104,7 +115,7 @@ Distribution:      Standardized Student's t   AIC:                           358
 Method:                  Maximum Likelihood   BIC:                           3633.57
                                               No. Observations:                 1261
 Date:                      Sun, May 17 2020   Df Residuals:                     1252
-Time:                              22:11:08   Df Model:                            9
+Time:                              18:50:26   Df Model:                            9
                                 Mean Model                                
 ==========================================================================
                  coef    std err          t      P>|t|    95.0% Conf. Int.
@@ -129,6 +140,10 @@ nu             5.8426      0.981      5.953  2.630e-09 [  3.919,  7.766]
 ========================================================================
 
 Covariance estimator: robust
+
+-----------------------------------------------------------------------------
+DAX GARCH(1,1) estimation with COVID-19
+-----------------------------------------------------------------------------
                         Constant Mean - GARCH Model Results                         
 ====================================================================================
 Dep. Variable:                    Adj Close   R-squared:                      -0.003
@@ -138,7 +153,7 @@ Distribution:      Standardized Student's t   AIC:                           394
 Method:                  Maximum Likelihood   BIC:                           3974.15
                                               No. Observations:                 1345
 Date:                      Sun, May 17 2020   Df Residuals:                     1340
-Time:                              22:11:09   Df Model:                            5
+Time:                              18:50:28   Df Model:                            5
                                 Mean Model                                
 ==========================================================================
                  coef    std err          t      P>|t|    95.0% Conf. Int.
@@ -159,3 +174,4 @@ nu             5.2803      0.772      6.841  7.866e-12 [  3.767,  6.793]
 ========================================================================
 
 Covariance estimator: robust
+
