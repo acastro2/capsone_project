@@ -20,6 +20,7 @@ Mean Squared Error (MSE) and Mean Absolute Error (MAE).
 
 import os
 import sys
+import arch
 import pandas as pd
 import pandas_datareader.data as web
 import numpy as np
@@ -86,11 +87,15 @@ def plot_time_series(data, lags=None, title=None):
 
         data.plot(ax=ts_ax)
         ts_ax.set_title(title if title else 'Time Series Analysis Plots')
-        smt.graphics.plot_acf(data, lags=lags, ax=acf_ax, alpha=0.5)
-        smt.graphics.plot_pacf(data, lags=lags, ax=pacf_ax, alpha=0.5)
+        smt.graphics.plot_acf(data, lags=lags, ax=acf_ax, alpha=0.5, zero=False)
+        smt.graphics.plot_pacf(data, lags=lags, ax=pacf_ax, alpha=0.5, zero=False)
         sm.qqplot(data, line='s', ax=qq_ax)
         qq_ax.set_title('QQ Plot')
         scs.probplot(data, sparams=(data.mean(), data.std()), plot=pp_ax)
+        plt.sca(acf_ax)
+        plt.xticks(np.arange(1,  lags + 1, 2.0))
+        plt.sca(pacf_ax)
+        plt.xticks(np.arange(1,  lags + 1, 2.0))
         plt.tight_layout()
 
     return fig
@@ -120,8 +125,12 @@ def plot_acf_pacf(data, lags=None):
         layout = (1, 2)
         acf_ax = plt.subplot2grid(layout, (0, 0))
         pacf_ax = plt.subplot2grid(layout, (0, 1))
-        smt.graphics.plot_acf(data, lags=lags, ax=acf_ax, alpha=0.5)
-        smt.graphics.plot_pacf(data, lags=lags, ax=pacf_ax, alpha=0.5)
+        smt.graphics.plot_acf(data, lags=lags, ax=acf_ax, alpha=0.5, zero=False)
+        smt.graphics.plot_pacf(data, lags=lags, ax=pacf_ax, alpha=0.5, zerop=False)
+        plt.sca(acf_ax)
+        plt.xticks(np.arange(1,  lags + 1, 2.0))
+        plt.sca(pacf_ax)
+        plt.xticks(np.arange(1,  lags + 1, 2.0))
         plt.tight_layout()
 
     return fig
@@ -225,8 +234,29 @@ def find_best_arima_model(time_series):
 
     return best_aic, best_order, best_mdl
 
+def fit_arch(time_series, q=1):
+    """Return fit ARCH Model
 
-def fit_garch(time_series, best_order):
+    Parameters
+    ==========
+    time_series : series
+        One-dimensional ndarray with axis labels (including time series).
+    best_order : tuple
+        One-dimensional ndarray with axis labels (including time series).
+
+    Returns
+    =======
+    best_aic : float
+    best_order : float
+    """
+
+    am = arch.univariate.ConstantMean(time_series)
+    am.volatility = arch.univariate.ARCH(q)
+    am.distribution=arch.univariate.StudentsT()
+
+    return am.fit(update_freq=5, disp='off')
+
+def fit_garch(time_series, p=1, o=0, q=1):
     """Return fit GARCH Model
 
     Parameters
@@ -242,11 +272,9 @@ def fit_garch(time_series, best_order):
     best_order : float
     """
 
-    p_ = best_order[0]
-    o_ = best_order[1]
-    q_ = best_order[2]
-
-    am = arch_model(time_series, p=p_, o=o_, q=q_, dist='StudentsT')
+    am = arch.univariate.ConstantMean(time_series)
+    am.volatility = arch.univariate.GARCH(p, o, q)
+    am.distribution=arch.univariate.StudentsT()
 
     return am.fit(update_freq=5, disp='off')
 
@@ -413,24 +441,76 @@ def main():
     # The Ljung-Box test on the square of the residuals of the ARIMA model show exactly the expected
     # behaviour of having correlation. We need to fit a model with ARCH characteristics.
 
-    # # GARCH Model fitting
-    # spx_garch = fit_garch(log_returns_percent[SPX].loc[start:end_slice], res_tup_spx[1])
-    # plot_time_series(spx_garch.resid, lags=lags_).savefig('images/2_spx_garch_residuals_analysis')
-    # plot_acf_pacf(spx_garch.resid ** 2, lags=lags_).savefig('images/2_spx_garch_squared_residuals_analysis')
-    # plot_ljung_box_test(spx_garch.resid, lags=lags_).savefig('images/2_spx_garch_square_resid_ljung_analysis')
-    # print(spx_garch.summary())
-    
-    # dax_garch = fit_garch(log_returns_percent[DAX].loc[start:end_slice], res_tup_dax[1])
-    # plot_time_series(dax_garch.resid, lags=lags_).savefig('images/3_dax_garch_residuals_analysis')
-    # plot_acf_pacf(dax_garch.resid ** 2, lags=lags_).savefig('images/3_dax_garch_squared_residuals_analysis')
-    # plot_ljung_box_test(dax_garch.resid, lags=lags_).savefig('images/3_dax_garch_square_resid_ljung_analysis')
-    # print(dax_garch.summary())
+    # ARCH Model fitting -> We are fitting one ARCH, to check whether we need to do a GARCH, then
+    # checking the standardized squared residuals of the model we fitted, we see the existence of
+    # autocorrelation, which leads to the need of a GARCH model.
+    spx_arch_1 = fit_arch(spx_estimation_time_series)
+    print(spx_arch_1.summary())
+    spx_arch_1_std_resid = spx_arch_1.resid / spx_arch_1.conditional_volatility
+    plot_time_series(spx_arch_1_std_resid, lags=lags_).savefig('images/8_spx_arch_1_std_residuals_analysis')
+    plot_time_series(spx_arch_1_std_resid ** 2, lags=lags_).savefig('images/9_spx_arch_1_std_resid_square_analysis')
+    plot_ljung_box_test(spx_arch_1_std_resid ** 2, lags=lags_).savefig('images/10_spx_arch_1_std_resid_square_ljung_analysis')
 
-    # sse_garch = fit_garch(log_returns_percent[SSE].loc[start:end_slice], res_tup_sse[1])
-    # plot_time_series(sse_garch.resid, lags=lags_).savefig('images/4_sse_garch_residuals_analysis')
-    # plot_acf_pacf(sse_garch.resid ** 2, lags=lags_).savefig('images/4_sse_garch_squared_residuals_analysis')
-    # plot_ljung_box_test(sse_garch.resid, lags=lags_).savefig('images/4_sse_garch_square_resid_ljung_analysis')
-    # print(sse_garch.summary())
+    dax_arch_1 = fit_arch(dax_estimation_time_series)
+    print(dax_arch_1.summary())
+    dax_arch_1_std_resid = dax_arch_1.resid / dax_arch_1.conditional_volatility
+    plot_time_series(dax_arch_1_std_resid, lags=lags_).savefig('images/8_dax_arch_1_std_residuals_analysis')
+    plot_time_series(dax_arch_1_std_resid ** 2, lags=lags_).savefig('images/9_dax_arch_1_std_resid_square_analysis')
+    plot_ljung_box_test(dax_arch_1_std_resid ** 2, lags=lags_).savefig('images/10_dax_arch_1_std_resid_square_ljung_analysis')
+
+    sse_arch_1 = fit_arch(sse_estimation_time_series)
+    print(sse_arch_1.summary())
+    sse_arch_1_std_resid = sse_arch_1.resid / sse_arch_1.conditional_volatility
+    plot_time_series(sse_arch_1_std_resid, lags=lags_).savefig('images/8_sse_arch_1_std_residuals_analysis')
+    plot_time_series(sse_arch_1_std_resid ** 2, lags=lags_).savefig('images/9_sse_arch_1_std_resid_square_analysis')
+    plot_ljung_box_test(sse_arch_1_std_resid ** 2, lags=lags_).savefig('images/10_sse_arch_1_std_resid_square_ljung_analysis')
+
+    # GARCH Model fitting -> We are fitting two GARCHs, the first one is a GARCH(1,1). We selected
+    # this model because there are evidence in the literature that a GARCH(1,1) outperforms higher
+    # orders of GARCH models when checking the AIC criteria.
+    spx_garch_1_1 = fit_garch(spx_estimation_time_series)
+    print(spx_garch_1_1.summary())
+    spx_garch_1_1_std_resid = spx_garch_1_1.resid / spx_garch_1_1.conditional_volatility
+    plot_time_series(spx_garch_1_1_std_resid, lags=lags_).savefig('images/11_spx_garch_1_1_std_residuals_analysis')
+    plot_time_series(spx_garch_1_1_std_resid ** 2, lags=lags_).savefig('images/12_spx_garch_1_1_std_resid_square_analysis')
+    plot_ljung_box_test(spx_garch_1_1_std_resid ** 2, lags=lags_).savefig('images/13_spx_garch_1_1_std_resid_square_ljung_analysis')
+
+    dax_garch_1_1 = fit_garch(dax_estimation_time_series)
+    print(dax_garch_1_1.summary())
+    dax_garch_1_1_std_resid = dax_garch_1_1.resid / dax_garch_1_1.conditional_volatility
+    plot_time_series(dax_garch_1_1_std_resid, lags=lags_).savefig('images/11_dax_garch_1_1_std_residuals_analysis')
+    plot_time_series(dax_garch_1_1_std_resid ** 2, lags=lags_).savefig('images/12_dax_garch_1_1_std_resid_square_analysis')
+    plot_ljung_box_test(dax_garch_1_1_std_resid ** 2, lags=lags_).savefig('images/13_dax_garch_1_1_std_resid_square_ljung_analysis')
+
+    sse_garch_1_1 = fit_garch(sse_estimation_time_series)
+    print(sse_garch_1_1.summary())
+    sse_garch_1_1_std_resid = sse_garch_1_1.resid / sse_garch_1_1.conditional_volatility
+    plot_time_series(sse_garch_1_1_std_resid, lags=lags_).savefig('images/11_sse_garch_1_1_std_residuals_analysis')
+    plot_time_series(sse_garch_1_1_std_resid ** 2, lags=lags_).savefig('images/12_sse_garch_1_1_std_resid_square_analysis')
+    plot_ljung_box_test(sse_garch_1_1_std_resid ** 2, lags=lags_).savefig('images/13_sse_garch_1_1_std_resid_square_ljung_analysis')
+
+    # The second model is a GARCH that uses the best ARIMA estimation for p, o and q to check if
+    # this model outperforms the previous one.
+    spx_garch_best = fit_garch(spx_estimation_time_series, spx_arima_best_order[0], spx_arima_best_order[1], spx_arima_best_order[2])
+    print(spx_garch_best.summary())
+    spx_garch_best_std_resid = spx_garch_best.resid / spx_garch_best.conditional_volatility
+    plot_time_series(spx_garch_best_std_resid, lags=lags_).savefig('images/14_spx_garch_best_std_resid_square_analysis')
+    plot_time_series(spx_garch_best_std_resid ** 2, lags=lags_).savefig('images/15_spx_garch_best_std_resid_square_analysis')
+    plot_ljung_box_test(spx_garch_best_std_resid ** 2, lags=lags_).savefig('images/16_spx_garch_best_std_resid_square_ljung_analysis')
+
+    dax_garch_best = fit_garch(dax_estimation_time_series, dax_arima_best_order[0], dax_arima_best_order[1], dax_arima_best_order[2])
+    print(dax_garch_best.summary())
+    dax_garch_best_std_resid = dax_garch_best.resid / dax_garch_best.conditional_volatility
+    plot_time_series(dax_garch_best_std_resid, lags=lags_).savefig('images/14_dax_garch_best_std_resid_square_analysis')
+    plot_time_series(dax_garch_best_std_resid ** 2, lags=lags_).savefig('images/15_dax_garch_best_std_resid_square_analysis')
+    plot_ljung_box_test(dax_garch_best_std_resid ** 2, lags=lags_).savefig('images/16_dax_garch_best_std_resid_square_ljung_analysis')
+
+    sse_garch_best = fit_garch(sse_estimation_time_series, sse_arima_best_order[0], sse_arima_best_order[1], sse_arima_best_order[2])
+    print(sse_garch_best.summary())
+    sse_garch_best_std_resid = sse_garch_best.resid / sse_garch_best.conditional_volatility
+    plot_time_series(sse_garch_best_std_resid, lags=lags_).savefig('images/14_sse_garch_best_std_resid_square_analysis')
+    plot_time_series(sse_garch_best_std_resid ** 2, lags=lags_).savefig('images/15_sse_garch_best_std_resid_square_analysis')
+    plot_ljung_box_test(sse_garch_best_std_resid ** 2, lags=lags_).savefig('images/16_sse_garch_best_std_resid_square_ljung_analysis')
 
 
 if __name__ == '__main__':
