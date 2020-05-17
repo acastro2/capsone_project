@@ -1,0 +1,5 @@
+This file contains a list of people who have made large contributions to this Capstone Project.
+
+Alexandre Castro <alexandre.castro@outlook.com>
+Bruno Jordan Orfei Abe <brunojordan@gmail.com>
+Francisco Costa <franciscojoaomatoscosta@gmail.com>
