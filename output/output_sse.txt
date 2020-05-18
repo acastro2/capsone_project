@@ -10,8 +10,8 @@ SSE ARIMA (3, 0, 3)
 Dep. Variable:              Adj Close   No. Observations:                 1261
 Model:                     ARMA(3, 3)   Log Likelihood               -2075.330
 Method:                           mle   S.D. of innovations              1.255
-Date:                Sun, 17 May 2020   AIC                           4164.661
-Time:                        18:50:53   BIC                           4200.638
+Date:                Mon, 18 May 2020   AIC                           4164.661
+Time:                        08:47:52   BIC                           4200.638
 Sample:                             0   HQIC                          4178.180
                                                                               
 ===================================================================================
@@ -35,7 +35,7 @@ MA.2           -0.1929           -1.0401j            1.0579           -0.2792
 MA.3           -0.1929           +1.0401j            1.0579            0.2792
 -----------------------------------------------------------------------------
 
-Engle's test for ARCH Effects for log-returns of SSE: (46.66404831853937, 0.0024708377382496468, 2.077934275981846, 0.0020666380474614245)
+Engle's test for ARCH Effects for ARIMA Residuals of SSE: (46.66404831853937, 0.0024708377382496468, 2.077934275981846, 0.0020666380474614245)
 -----------------------------------------------------------------------------
 SSE ARCH(1)
 -----------------------------------------------------------------------------
@@ -47,8 +47,8 @@ Vol Model:                             ARCH   Log-Likelihood:               -195
 Distribution:      Standardized Student's t   AIC:                           3923.47
 Method:                  Maximum Likelihood   BIC:                           3944.02
                                               No. Observations:                 1261
-Date:                      Sun, May 17 2020   Df Residuals:                     1257
-Time:                              18:50:55   Df Model:                            4
+Date:                      Mon, May 18 2020   Df Residuals:                     1257
+Time:                              08:47:53   Df Model:                            4
                                   Mean Model                                 
 =============================================================================
                  coef    std err          t      P>|t|       95.0% Conf. Int.
@@ -80,8 +80,8 @@ Vol Model:                            GARCH   Log-Likelihood:               -195
 Distribution:      Standardized Student's t   AIC:                           3910.62
 Method:                  Maximum Likelihood   BIC:                           3936.32
                                               No. Observations:                 1261
-Date:                      Sun, May 17 2020   Df Residuals:                     1256
-Time:                              18:50:56   Df Model:                            5
+Date:                      Mon, May 18 2020   Df Residuals:                     1256
+Time:                              08:47:55   Df Model:                            5
                                   Mean Model                                 
 =============================================================================
                  coef    std err          t      P>|t|       95.0% Conf. Int.
@@ -114,8 +114,8 @@ Vol Model:                            GARCH   Log-Likelihood:               -195
 Distribution:      Standardized Student's t   AIC:                           3918.26
 Method:                  Maximum Likelihood   BIC:                           3964.52
                                               No. Observations:                 1261
-Date:                      Sun, May 17 2020   Df Residuals:                     1252
-Time:                              18:50:57   Df Model:                            9
+Date:                      Mon, May 18 2020   Df Residuals:                     1252
+Time:                              08:47:56   Df Model:                            9
                                  Mean Model                                
 ===========================================================================
                  coef    std err          t      P>|t|     95.0% Conf. Int.
@@ -152,8 +152,8 @@ Vol Model:                            GARCH   Log-Likelihood:               -215
 Distribution:      Standardized Student's t   AIC:                           4324.32
 Method:                  Maximum Likelihood   BIC:                           4350.35
                                               No. Observations:                 1346
-Date:                      Sun, May 17 2020   Df Residuals:                     1341
-Time:                              18:50:59   Df Model:                            5
+Date:                      Mon, May 18 2020   Df Residuals:                     1341
+Time:                              08:47:57   Df Model:                            5
                                   Mean Model                                 
 =============================================================================
                  coef    std err          t      P>|t|       95.0% Conf. Int.

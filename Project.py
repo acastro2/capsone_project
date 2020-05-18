@@ -392,7 +392,7 @@ def run_analysis(desc, symbol, start, end, start_forecast, end_slice, lags_, his
 
         # Lets check for the presence of arch effects in the data.
         arch_test = sms.diagnostic.het_arch(arima_best_mdl.resid, ddof=arima_best_order[0] + arima_best_order[2])
-        print(f"Engle's test for ARCH Effects for log-returns of {desc}: {arch_test}", file=f)
+        print(f"Engle's test for ARCH Effects for ARIMA Residuals of {desc}: {arch_test}", file=f)
 
         plot_time_series(arima_best_mdl.resid, lags=lags_, title=f'Time series property for ARIMA residuals of {desc}', filename=f'images/4_{desc}_arima_resid_analysis')
 
