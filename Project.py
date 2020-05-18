@@ -8,13 +8,16 @@ Date Created | Author                 |
 Code uses Python 3.7.7
 
 ==================================================================================================
-The main goal of this research is to understand if GARCH models maintain superior performance in
-forecasting volatility, despite the high price fluctuations in the financial markets due to extreme
-shocks such as the one that happened with the COVID-19 phenom- ena. In this study, we will focus on
-three different markets: the USA, Germany, and China. To achieve that, we use data composed of
-daily quotations of the S&P 500, DAX 30, and SSE, and spanning over a period of 180 days until the
-31st of March 2020. The GARCH models’ performance will be assessed using loss functions such as
-Mean Squared Error (MSE) and Mean Absolute Error (MAE).
+The main goal of this research is to validate empirically if GARCH models maintain superior
+performance in forecasting volatility, even in times exhibiting high price fluctuations in the
+financial markets due to extreme shocks such as the one that happened with the COVID-19 phenomena.
+To test this hypothesis, we will focus on three different markets: the USA, Germany, and China,
+where we are going to use data composed of daily quotations of the S\&P 500, DAX 30, and SSE, and
+spanning for over five years from the 1st of January 2015 until the 31st of March 2020.
+The comparison between the GARCH models' performances will be assessed using well-known statistics
+such as the AIC and the BIC, as well as correlation tests such as the Ljung-Box test on the squared
+standardized residuals of the models to understand if they are capturing all the information on the
+heteroskedasticity.
 ===================================================================================================
 """
 
